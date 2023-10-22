@@ -1,2 +1,2 @@
 # PreOAI
-使用workers为openai反向代理进行预处理
+使用workers为反向代理进行clewd修改版的FullColon以及xmlPlot预处理
