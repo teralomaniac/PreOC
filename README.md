@@ -1,2 +1,2 @@
-# PreOAI
-使用workers为反向代理进行clewd修改版的FullColon以及xmlPlot预处理
+# PreOC
+使用cloudflare workers为openai to claude反向代理进行预处理
