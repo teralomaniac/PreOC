@@ -65,6 +65,7 @@ const FCxP = (content) => {
 
     //<card>群组
     if (!card) {
+        content = content.replace(/(?<=\n\n(H(?:uman)?|A(?:ssistant)?)):[ ]?/g, '： ');
         content = content.replace(/(<reply>\n|\n<\/reply>)/g, '');
         return content.replace(/<customname>(.*?)<\/customname>/gm, '$1');
     } else {
@@ -94,7 +95,7 @@ const FCxP = (content) => {
     content = content.replace(/(?<=(: |\n)<(card|hidden|example|plot|META|EOT)>\n)\s*/g, '');
     content = content.replace(/\s*(?=\n<\/(card|hidden|example|plot|META|EOT)>(\n|$))/g, '');
     content = content.replace(/(?<=\n)\n(?=\n)/g, '');
-    content = content.replace(/(?<=\n\n(H(?:uman)?|A(?:ssistant)?)):[ ]?/g, '： ')
+    content = content.replace(/(?<=\n\n(H(?:uman)?|A(?:ssistant)?)):[ ]?/g, '： ');
 
     return content.trim();
 };
