@@ -107,6 +107,12 @@ async function handleRequest(request) {
     const url = new URL(request.url);
     url.host = OPENAI_URL.replace(/^https?:\/\//, '');
 
+    if (/^https/.test(OPENAI_URL)) {
+        url.protocol = 'https:';
+    } else {
+        url.protocol = 'http:';
+    }
+
     let body;
     if (request.body) {
         const reader = request.body.getReader();
