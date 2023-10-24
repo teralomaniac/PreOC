@@ -1,4 +1,4 @@
-const OPENAI_URL = '填入反向代理地址';
+const rProxy_URL = '填入原反代地址';
 
 const FCxP = (content) => {
     // 检查内容中是否包含"<card>"
@@ -106,13 +106,10 @@ addEventListener('fetch', event => {
 
 async function handleRequest(request) {
     const url = new URL(request.url);
-    url.host = OPENAI_URL.replace(/^https?:\/\//, '');
-
-    if (/^https/.test(OPENAI_URL)) {
-        url.protocol = 'https:';
-    } else {
-        url.protocol = 'http:';
-    }
+    const rProxyURL = new URL(rProxy_URL);
+    url.host = rProxyURL.host;
+    url.protocol = rProxyURL.protocol;
+    url.port = request.port;
 
     let body;
     if (request.body) {
