@@ -4,6 +4,9 @@ const FCxP = (content) => {
     // 检查内容中是否包含"<card>"
     const card = content.includes('<card>');
 
+    //若以<file-attachment-contents>结尾，给开头加上</file-attachment-contents>用于截断附加文件标识
+    /<file-attachment-contents>\s*$/.test(content) && (content = '</file-attachment-contents>\n\n' + content);
+
     //<card>越狱倒置
     if (card) {
         let segcontentHuman = content.split('\n\nHuman:');
@@ -49,6 +52,15 @@ const FCxP = (content) => {
     content = splitContent.join('\n\n');
     content = content.replace(/<@(\d+)>.*?<\/@\1>/gs, '');
 
+    //正则
+    while ((match = /<regex>"(\/?)(.*)\1(.*)" *: *"(.*?)"<\/regex>/gm.exec(content)) !== null) {
+        try {
+            content = content.replace(new RegExp(match[2], match[3]), match[4]);
+        } catch (error) {}
+        content = content.replace(match[0], '');
+    }
+    content = content.replace(/(\r\n|\r|\\n)/gm, '\n');
+
     //二次role合并
     if (!MergeDisable) {
         if (!MergeHumanDisable) {
@@ -59,9 +71,10 @@ const FCxP = (content) => {
         }
     }
 
-    //Plain Prompt
-    content = content.replace(/<\!-- Plain Prompt Enable -->/, '');
-    content = content.replace(/PlainPrompt:/gm, '');
+    //Plain Prompt去除
+    content = content.replace(/<\!-- Plain Prompt Enable -->/gm, '');
+    content = content.replace(/^PlainPrompt:/, '');
+    content = content.replace(/\n\nPlainPrompt:/gm, '\n\nHuman:');
 
     //<card>群组
     if (!card) {
@@ -73,30 +86,25 @@ const FCxP = (content) => {
         content = content.replace(/<customname>(.*?)<\/customname>:/gm, '$1:\n');
     }
 
-    //<card>给开头加上</file-attachment-contents>用于截断附加文件标识
-    content.includes('<file-attachment-contents>') && (content = '</file-attachment-contents>\n\n' + content);
-
     //<card>在第一个"[Start a new"前面加上"<example>"，在最后一个"[Start a new"前面加上"</example>\n\n<plot>\n\n"
-    const exampleNote = content.match(/(?<=<example-note>).*(?=<\/example-note>)/) || '';
     const cardtag = content.match(/(?=\n\n<\/card>)/) || '</card>';
     const exampletag = content.match(/(?=\n\n<\/example>)/) || '</example>';
     const plot = content.includes('</plot>') ? '<plot>' : '';
-    content = content.replace(/<example-note>.*<\/example-note>/, '');
     const firstChatStart = content.indexOf('\n\n[Start a new');
     const lastChatStart = content.lastIndexOf('\n\n[Start a new');
     firstChatStart != -1 && firstChatStart === lastChatStart && (content = content.slice(0, firstChatStart) + `\n\n${cardtag}` + content.slice(firstChatStart));
-    firstChatStart != lastChatStart && (content = content.slice(0, firstChatStart) + `\n\n${cardtag}\n\n${exampleNote}\n<example>` + content.slice(firstChatStart, lastChatStart) + `\n\n${exampletag}\n\n${plot}` + content.slice(lastChatStart));
-
-    //<card>消除空XML tags或多余的\n
+    firstChatStart != lastChatStart && (content = content.slice(0, firstChatStart) + `\n\n${cardtag}\n<example>` + content.slice(firstChatStart, lastChatStart) + `\n\n${exampletag}\n\n${plot}` + content.slice(lastChatStart));
+    
+    //<card>消除空XML tags、两端空白符和多余的\n
     content = content.replace(/\s*<\|curtail\|>\s*/g, '\n');
-    content = content.replace(/\n<\/(hidden|META)>\s+?<\1>\n/g, '');
+    content = content.replace(/\n<\/(card|hidden|META)>\s+?<\1>\n/g, '');
     content = content.replace(/\n<(\/?card|example|hidden|plot|META)>\s+?<\1>/g, '\n<$1>');
     content = content.replace(/(?:<!--.*?-->)?\n<(card|example|hidden|plot|META)>\s+?<\/\1>/g, '');
     content = content.replace(/(?<=(: |\n)<(card|hidden|example|plot|META|EOT)>\n)\s*/g, '');
     content = content.replace(/\s*(?=\n<\/(card|hidden|example|plot|META|EOT)>(\n|$))/g, '');
     content = content.replace(/(?<=\n)\n(?=\n)/g, '');
-    content = content.replace(/(?<=\n\n(H(?:uman)?|A(?:ssistant)?)):[ ]?/g, '： ');
 
+    content = content.replace(/(?<=\n\n(H(?:uman)?|A(?:ssistant)?)):[ ]?/g, '： ');
     return content.trim();
 };
 
