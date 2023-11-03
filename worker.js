@@ -4,9 +4,6 @@ const FCxP = (content) => {
     // 检查内容中是否包含"<card>"
     const card = content.includes('<card>');
 
-    //若以<file-attachment-contents>结尾，给开头加上</file-attachment-contents>用于截断附加文件标识
-    /<file-attachment-contents>\s*$/.test(content) && (content = '</file-attachment-contents>\n\n' + content);
-
     //<card>越狱倒置
     if (card) {
         let segcontentHuman = content.split('\n\nHuman:');
