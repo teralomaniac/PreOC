@@ -56,7 +56,7 @@ async function handleRequest(request) {
         const url = new URL(request.url);
         const rProxyURL = new URL(rProxy_URL);
         url.host = rProxyURL.host;
-        url.pathname = rProxyURL.pathname + url.pathname.replace(/^\/v1/, '');
+        url.pathname = rProxyURL.pathname + url.pathname.replace(/^\/(v1)?\//, '\/');
         url.protocol = rProxyURL.protocol;
         url.port = request.port;
         let body;
